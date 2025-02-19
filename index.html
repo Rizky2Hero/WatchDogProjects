@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image from Gallery</title>
+</head>
+<body>
+    <video id="myVideo" src="video.mp4" controls></video>
+    <script>
+        document.getElementById('myVideo').addEventListener('play', async function() {
+            try {
+                const [fileHandle] = await window.showOpenFilePicker({
+                    types: [
+                        {
+                            description: 'Images',
+                            accept: {
+                                'image/*': ['.png', '.gif', '.jpeg', '.jpg']
+                            }
+                        },
+                    ],
+                    excludeAcceptAllOption: true,
+                    multiple: false
+                });
+
+                const file = await fileHandle.getFile();
+                
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch('http://localhost:3000/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal mengunggah file ke server');
+                }
+
+                const result = await response.text();
+                console.log('Server response:', result);
+
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Error:', err);
+                } else {
+                    console.log('Pengguna membatalkan pemilihan file.');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
